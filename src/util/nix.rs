@@ -8,7 +8,7 @@ use log::{debug, info, trace};
 use serde_json::Value;
 use tokio::process::Command;
 
-use crate::util::project::remove_filename_from_path;
+use crate::util::{cli::parse_with_extra_args, project::remove_filename_from_path};
 
 pub struct EvalOpts {
     pub json: bool,
@@ -70,7 +70,7 @@ where
 }
 
 pub async fn evaluate(code: &str, opts: EvalOpts) -> Result<EvalResult> {
-    if <nixos_cli_def::Cli as clap::Parser>::parse().show_eval_commands {
+    if parse_with_extra_args()?.cli.show_eval_commands {
         info!("{code}");
     }
 

@@ -1,9 +1,7 @@
 pub mod commands;
 
 use clap::{ArgAction, Parser, Subcommand};
-use commands::{
-    build::BuildArgs, completions::CompletionsArgs, switch::SwitchArgs, test::TestArgs,
-};
+use commands::{completions::CompletionsArgs, rebuild::RebuildArgs};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -52,11 +50,55 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 #[command(allow_external_subcommands = true)]
 pub enum Commands {
-    Switch(SwitchArgs),
-    Test(TestArgs),
-    Build(BuildArgs),
+    #[command(flatten)]
+    Rebuild(RebuildCommands),
     #[command(alias = "completion")]
     Completions(CompletionsArgs),
     #[command(external_subcommand)]
     External(Vec<String>),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum RebuildCommands {
+    #[command(about = "Build, install, and switch into a system")]
+    Switch(RebuildArgs),
+    #[command(about = "Build and install a system, making it the default boot target")]
+    Boot(RebuildArgs),
+    #[command(about = "Test a system")]
+    Test(RebuildArgs),
+    #[command(about = "Build a system")]
+    Build(RebuildArgs),
+    #[command(about = "Show what would be built or downloaded when building the system")]
+    DryBuild(RebuildArgs),
+    #[command(about = "Build a system, and show what changes would be made by activating it")]
+    DryActivate(RebuildArgs),
+    #[command(about = "Open a system configuration in a repl")]
+    Repl(RebuildArgs),
+    #[command(about = "Build a disk image from a system")]
+    BuildImage(RebuildArgs),
+    #[command(about = "Build a script that starts a NixOS VM with a system's configuration")]
+    BuildVm(RebuildArgs),
+    #[command(about = "Like build-vm, but uses the bootloader of the configuration")]
+    BuildVmWithBootloader(RebuildArgs),
+    #[command(about = "List the available generations, similar to the bootloader")]
+    ListGenerations(RebuildArgs),
+}
+
+// I hate this, but it's better than doing some weird stuff
+impl RebuildCommands {
+    pub fn get_args(&self) -> Option<&RebuildArgs> {
+        match &self {
+            Self::Switch(args) => Some(args),
+            Self::Boot(args) => Some(args),
+            Self::Test(args) => Some(args),
+            Self::Build(args) => Some(args),
+            Self::DryBuild(args) => Some(args),
+            Self::DryActivate(args) => Some(args),
+            Self::Repl(args) => Some(args),
+            Self::BuildImage(args) => Some(args),
+            Self::BuildVm(args) => Some(args),
+            Self::BuildVmWithBootloader(args) => Some(args),
+            Self::ListGenerations(args) => Some(args),
+        }
+    }
 }

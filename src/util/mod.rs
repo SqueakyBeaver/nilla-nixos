@@ -1,3 +1,4 @@
+pub mod cli;
 pub mod errors;
 pub mod git;
 pub mod nix;
